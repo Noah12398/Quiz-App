@@ -30,7 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get: ^4.6.5 # Use the latest version
+  get: ^4.6.5
+  firebase_core: ^2.10.0  # Downgrade firebase_core to a version compatible with Dart SDK 3.1.4
+  cloud_firestore: ^4.10.0  # Downgrade cloud_firestore to a compatible version
+
 
 
   # The following adds the Cupertino Icons font to your application.
