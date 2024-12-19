@@ -1,29 +1,64 @@
 import 'package:get/get.dart';
 
 class ButtonController extends GetxController {
-  bool _isSelected1 = false;
-  var _isSelected2 = false;
-  var _isSelected3 = false;
-  var _isSelected4 = false;
-  bool get isSelected1 => _isSelected1;
-  bool get isSelected2 => _isSelected2;
-  bool get isSelected3 => _isSelected3;
-  bool get isSelected4 => _isSelected4;
+  bool isSelected1 = false;
+  bool isSelected2 = false;
+  bool isSelected3 = false;
+  bool isSelected4 = false;
+  int currentQuestionIndex = 0;
+  int Score=0;
+  int totalQuestions=0;
+  void toggleButton1() {
+    isSelected1 = true;
+    isSelected2 = false;
+    isSelected3 = false;
+    isSelected4 = false;
+    update();
+  }
 
-  void toggleButton1(){
-    _isSelected1 = !_isSelected1;
+  void toggleButton2() {
+    isSelected1 = false;
+    isSelected2 = true;
+    isSelected3 = false;
+    isSelected4 = false;
     update();
   }
-  void toggleButton2(){
-    _isSelected2 = !_isSelected2;
+
+  void toggleButton3() {
+    isSelected1 = false;
+    isSelected2 = false;
+    isSelected3 = true;
+    isSelected4 = false;
     update();
   }
-  void toggleButton3(){
-    _isSelected3 = !_isSelected3;
+
+  void toggleButton4() {
+    isSelected1 = false;
+    isSelected2 = false;
+    isSelected3 = false;
+    isSelected4 = true;
     update();
   }
-  void toggleButton4(){
-    _isSelected4 = !_isSelected4;
-    update();
+
+    void nextQuestion() {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      currentQuestionIndex++;
+      isSelected1 = false;
+      isSelected2 = false;
+      isSelected3 = false;
+      isSelected4 = false;
+      Score=Score+5;
+      update();
+    } else {
+      Get.snackbar('Quiz Completed', 'You have answered all the questions!');
+    }
+  }
+
+  void resetQuiz() {
+    currentQuestionIndex=0;
+    Score=0;
+    update(); // Notify listeners that the state has been reset
+
   }
 }
+
