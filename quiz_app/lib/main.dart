@@ -1,16 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:quiz_app/firebase_options.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'Controller.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'GameOverScreen.dart';
+import 'quiz_model.dart';
+import 'package:get/get.dart';
 
 void main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Hive.initFlutter();
+  Hive.registerAdapter(QuizAdapter()); // Register the Quiz adapter
+  await Hive.openBox<Quiz>('quizBox'); // Open the box to store quiz data
+  await storeQuizData(); // Store quiz questions in the database
   runApp(const MyApp());
+}
+
+Future<void> storeQuizData() async {
+  final box = await Hive.openBox<Quiz>('quizBox');
+
+  // Define quiz questions and options
+  final questions = [
+    Quiz(
+  question: 'Which programming language is used to write Flutter apps?',
+  options: ['Dart', 'Java', 'C++', 'Kotlin'],
+  answer: 0, // Correct answer: 'Dart'
+),
+Quiz(
+  question: 'Who is the creator of Flutter?',
+  options: ['Google', 'Facebook', 'Apple', 'Microsoft'],
+  answer: 0, // Correct answer: 'Google'
+),
+Quiz(
+  question: 'Which of these is an advantage of Flutter?',
+  options: ['Faster development', 'Native performance', 'Beautiful UIs', 'All of the above'],
+  answer: 3, // Correct answer: 'All of the above'
+),
+Quiz(
+  question: 'What is the default programming language used for Android development?',
+  options: ['Kotlin', 'Java', 'C++', 'Python'],
+  answer: 0, // Correct answer: 'Kotlin'
+),
+Quiz(
+  question: 'What is the capital of the United States?',
+  options: ['New York', 'Washington, D.C.', 'Los Angeles', 'Chicago'],
+  answer: 1, // Correct answer: 'Washington, D.C.'
+),
+Quiz(
+  question: 'Which company developed Android?',
+  options: ['Apple', 'Google', 'Microsoft', 'Samsung'],
+  answer: 1, // Correct answer: 'Google'
+),
+Quiz(
+  question: 'What does HTTP stand for?',
+  options: ['HyperText Transfer Protocol', 'HyperText Transmission Protocol', 'Hyper Transfer Text Protocol', 'HyperText Transmission Platform'],
+  answer: 0, // Correct answer: 'HyperText Transfer Protocol'
+),
+Quiz(
+  question: 'What is the main purpose of Git?',
+  options: ['To create websites', 'Version control', 'Database management', 'Code compilation'],
+  answer: 1, // Correct answer: 'Version control'
+),
+Quiz(
+  question: 'Which of the following is a database management system?',
+  options: ['Python', 'MySQL', 'JavaScript', 'Flutter'],
+  answer: 1, // Correct answer: 'MySQL'
+),
+Quiz(
+  question: 'Which of these is a valid Flutter widget?',
+  options: ['TextField', 'ButtonWidget', 'ListItem', 'ContainerBox'],
+  answer: 0, // Correct answer: 'TextField'
+),
+
+    // Add more questions as needed
+  ];
+
+  // Store questions in the Hive box
+  for (var question in questions) {
+    await box.add(question);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +84,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Quiz App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -29,7 +94,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key, required this.title});
   final String title;
@@ -37,223 +101,193 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonController controller = Get.put(ButtonController());
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final Box quizBox = Hive.box<Quiz>('quizBox');
 
-    Future<Map<String, dynamic>> fetchQuestion() async {
-      final querySnapshot = await _firestore.collection('Quiz').get();
-      int totalQuestions = querySnapshot.docs.length; // Get the total number of questions
-      controller.totalQuestions = totalQuestions;
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs[controller.currentQuestionIndex];
-        return {
-          'Question': doc['Question'] ?? 'No question found',
-          'Options': doc['Options'] ?? 'No options found',
-          'Answer': doc['Answer'] ?? 'No answer found',
-        };
-      } else {
-        return {
-          'Question': 'No question found',
-          'Options': 'No options found',
-          'Answer': 'No answer found',
-        };
-      }
-    }
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(title),
+      ),
+      body: GetBuilder<ButtonController>(
+        builder: (_) {
+          // Fetch the current question
+          Quiz? currentQuestion = controller.getCurrentQuestion();
+          if (currentQuestion == null) {
+            return Center(child: Text('No more questions'));
+          }
 
-    return Builder(
-      builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: Text(title),
-          ),
-          body: GetBuilder<ButtonController>(
-            builder: (_) {
-              return FutureBuilder<Map<String, dynamic>>(
-                future: fetchQuestion(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}')); // Error state
-                  }
-                  return Stack(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Text(
-                          'Score: ${controller.Score}',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(fontSize: 50),
+          return Stack(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                  'Score: ${controller.Score}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontSize: 50),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      currentQuestion.question,
+                      style: TextStyle(
+                          color: Colors.amber,
+                          fontStyle: FontStyle.normal,
+                          fontSize: 75),
+                    ),
+                    const SizedBox(height: 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            controller.toggleButton1();
+                            if (currentQuestion.answer == 0) {
+                              Future.delayed(Duration(seconds: 1), () {
+                                controller.nextQuestion();
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GameOverScreen(
+                                    onRestart: () {
+                                      Navigator.pop(context);
+                                      controller.resetQuiz();
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: controller.isSelected1
+                                ? (currentQuestion.answer == 0
+                                    ? Colors.green
+                                    : Colors.red)
+                                : Colors.white,
+                          ),
+                          child: Text(
+                            currentQuestion.options[0],
+                            style: TextStyle(fontSize: 45),
+                          ),
                         ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              snapshot.data?['Question']!,
-                              style: TextStyle(
-                                  color: Colors.amber,
-                                  fontStyle: FontStyle.normal,
-                                  fontSize: 75),
-                            ),
-                            const SizedBox(height: 50),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                TextButton(
-                                  onPressed:() {controller.toggleButton1();
-                                  if (snapshot.data?['Answer'] == 0) {
-                                    Future.delayed(Duration(seconds: 1), () {
-                                      controller.nextQuestion();
-                                    });
-                                  }else{
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => GameOverScreen(
-                                          onRestart: () {
-                                            Navigator.pop(context);
-                                            controller.resetQuiz();
-                                          },
-                                        ),
-                                      ),
-                                    );
-
-                                  }
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: controller.isSelected1
-                                        ? (snapshot.data?['Answer'] == 0 ? Colors.green : Colors.red)
-                                        : Colors.white,
-                                  ),
-                                  child: Text(
-                                    snapshot.data?['Options']![0],
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.normal,
-                                      fontSize: 45,
-                                    ),
+                        TextButton(
+                          onPressed: () {
+                            controller.toggleButton2();
+                            if (currentQuestion.answer == 1) {
+                              Future.delayed(Duration(seconds: 1), () {
+                                controller.nextQuestion();
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GameOverScreen(
+                                    onRestart: () {
+                                      Navigator.pop(context);
+                                      controller.resetQuiz();
+                                    },
                                   ),
                                 ),
-                                TextButton(
-                                  onPressed:() {controller.toggleButton2();
-                                  if (snapshot.data?['Answer'] == 1) {
-                                    Future.delayed(Duration(seconds: 1), () {
-                                      controller.nextQuestion();
-                                    });
-                                  }else{
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => GameOverScreen(
-                                          onRestart: () {
-                                            Navigator.pop(context);
-                                            controller.resetQuiz();
-                                          },
-                                        ),
-                                      ),
-                                    );
-
-                                  }
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: controller.isSelected2
-                                        ? (snapshot.data?['Answer'] == 1 ? Colors.green : Colors.red)
-                                        : Colors.white,
-                                  ),
-                                  child: Text(
-                                    snapshot.data?['Options']![1],
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.normal,
-                                      fontSize: 45,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 50),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                TextButton(
-                                  onPressed:() {controller.toggleButton3();
-                                  if (snapshot.data?['Answer'] == 2) {
-                                    Future.delayed(Duration(seconds: 1), () {
-                                      controller.nextQuestion();
-                                    });
-                                  }else{
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => GameOverScreen(
-                                          onRestart: () {
-                                            Navigator.pop(context);
-                                            controller.resetQuiz();
-                                          },
-                                        ),
-                                      ),
-                                    );
-
-                                  }
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: controller.isSelected3
-                                        ? (snapshot.data?['Answer'] == 2 ? Colors.green : Colors.red)
-                                        : Colors.white,
-                                  ),
-                                  child: Text(
-                                    snapshot.data?['Options']![2],
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.normal,
-                                      fontSize: 45,
-                                    ),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed:() {controller.toggleButton4();
-                                  if (snapshot.data?['Answer'] == 3) {
-                                    Future.delayed(Duration(seconds: 1), () {
-                                      controller.nextQuestion();
-                                    });
-                                  }else{
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => GameOverScreen(
-                                          onRestart: () {
-                                            Navigator.pop(context);
-                                            controller.resetQuiz();
-                                          },
-                                        ),
-                                      ),
-                                    );
-
-                                  }
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: controller.isSelected4
-                                        ? (snapshot.data?['Answer'] == 3 ? Colors.green : Colors.red)
-                                        : Colors.white,
-                                  ),
-                                  child: Text(
-                                    snapshot.data?['Options']![3],
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.normal,
-                                      fontSize: 45,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: controller.isSelected2
+                                ? (currentQuestion.answer == 1
+                                    ? Colors.green
+                                    : Colors.red)
+                                : Colors.white,
+                          ),
+                          child: Text(
+                            currentQuestion.options[1],
+                            style: TextStyle(fontSize: 45),
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
+                      ],
+                    ),
+                    const SizedBox(height: 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            controller.toggleButton3();
+                            if (currentQuestion.answer == 2) {
+                              Future.delayed(Duration(seconds: 1), () {
+                                controller.nextQuestion();
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GameOverScreen(
+                                    onRestart: () {
+                                      Navigator.pop(context);
+                                      controller.resetQuiz();
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: controller.isSelected3
+                                ? (currentQuestion.answer == 2
+                                    ? Colors.green
+                                    : Colors.red)
+                                : Colors.white,
+                          ),
+                          child: Text(
+                            currentQuestion.options[2],
+                            style: TextStyle(fontSize: 45),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            controller.toggleButton4();
+                            if (currentQuestion.answer == 3) {
+                              Future.delayed(Duration(seconds: 1), () {
+                                controller.nextQuestion();
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GameOverScreen(
+                                    onRestart: () {
+                                      Navigator.pop(context);
+                                      controller.resetQuiz();
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: controller.isSelected4
+                                ? (currentQuestion.answer == 3
+                                    ? Colors.green
+                                    : Colors.red)
+                                : Colors.white,
+                          ),
+                          child: Text(
+                            currentQuestion.options[3],
+                            style: TextStyle(fontSize: 45),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
