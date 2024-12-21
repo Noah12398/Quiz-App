@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/firebase_options.dart';
@@ -7,6 +6,7 @@ import 'Controller.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Cloud Firestore
 import 'GameOverScreen.dart';
+
 void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -39,7 +39,6 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ButtonController controller = Get.put(ButtonController());
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    int i = -1;
 
     Future<Map<String, dynamic>> fetchQuestion() async {
       final querySnapshot = await _firestore.collection('Quiz').get();
@@ -113,8 +112,8 @@ class MyHomePage extends StatelessWidget {
                                       MaterialPageRoute(
                                         builder: (context) => GameOverScreen(
                                           onRestart: () {
-                                            Navigator.pop(context); // Close GameOverScreen
-                                            controller.resetQuiz(); // Reset quiz state
+                                            Navigator.pop(context);
+                                            controller.resetQuiz();
                                           },
                                         ),
                                       ),

@@ -57,7 +57,7 @@ class ButtonController extends GetxController {
   void resetQuiz() {
     currentQuestionIndex=0;
     Score=0;
-    update(); // Notify listeners that the state has been reset
+    update();
 
   }
 }
