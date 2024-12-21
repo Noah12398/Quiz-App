@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ButtonController extends GetxController {
@@ -50,12 +51,22 @@ class ButtonController extends GetxController {
       Score=Score+5;
       update();
     } else {
-      Get.snackbar('Quiz Completed', 'You have answered all the questions!');
-    }
+      Get.snackbar(
+            'Quiz Completed',
+            'You have answered all the questions!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: const Color.fromARGB(255, 17, 13, 13),
+            margin: const EdgeInsets.all(16),
+      );    }
   }
 
   void resetQuiz() {
     currentQuestionIndex=0;
+    isSelected1 = false;
+    isSelected2 = false;
+    isSelected3 = false;
+    isSelected4 = false;
     Score=0;
     update();
 

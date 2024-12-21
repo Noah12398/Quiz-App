@@ -9,7 +9,6 @@ class GameOverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Game Over"),
         automaticallyImplyLeading: false,
       ),
       body: Center(
