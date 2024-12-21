@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:quiz_app/firebase_options.dart';
 import 'Controller.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Cloud Firestore
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'GameOverScreen.dart';
 
 void main() async {
@@ -140,6 +140,19 @@ class MyHomePage extends StatelessWidget {
                                     Future.delayed(Duration(seconds: 1), () {
                                       controller.nextQuestion();
                                     });
+                                  }else{
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => GameOverScreen(
+                                          onRestart: () {
+                                            Navigator.pop(context);
+                                            controller.resetQuiz();
+                                          },
+                                        ),
+                                      ),
+                                    );
+
                                   }
                                   },
                                   style: TextButton.styleFrom(
@@ -167,6 +180,19 @@ class MyHomePage extends StatelessWidget {
                                     Future.delayed(Duration(seconds: 1), () {
                                       controller.nextQuestion();
                                     });
+                                  }else{
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => GameOverScreen(
+                                          onRestart: () {
+                                            Navigator.pop(context);
+                                            controller.resetQuiz();
+                                          },
+                                        ),
+                                      ),
+                                    );
+
                                   }
                                   },
                                   style: TextButton.styleFrom(
@@ -188,6 +214,19 @@ class MyHomePage extends StatelessWidget {
                                     Future.delayed(Duration(seconds: 1), () {
                                       controller.nextQuestion();
                                     });
+                                  }else{
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => GameOverScreen(
+                                          onRestart: () {
+                                            Navigator.pop(context);
+                                            controller.resetQuiz();
+                                          },
+                                        ),
+                                      ),
+                                    );
+
                                   }
                                   },
                                   style: TextButton.styleFrom(

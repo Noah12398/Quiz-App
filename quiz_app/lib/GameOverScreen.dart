@@ -10,13 +10,13 @@ class GameOverScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Game Over"),
-        automaticallyImplyLeading: false, // Disable back button
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "Game Over",
               style: TextStyle(
                 fontSize: 48,
@@ -36,18 +36,6 @@ class GameOverScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Go back to the main menu or previous screen
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-              child: const Text(
-                "Main Menu",
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
           ],
         ),
       ),
